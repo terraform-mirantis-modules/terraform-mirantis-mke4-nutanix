@@ -1,0 +1,60 @@
+# Nutanix resources
+nutanix = {
+  endpoint = "someendpoint.org" # URL or IP address of Nutanix
+  username = "user"             # Nutanix username
+  password = "password"         # Nutanix password
+  insecure = false
+}
+
+# This name will be used as a prefix for VM names
+# E.g. if cluster_name = "mke4-cluster", then names of managers will look like this:
+# "mke4-cluster-controllers-0", "mke4-cluster-controllers-1", etc.
+# Names of workers will look like this:
+# "mke4-cluster-workers-0", "mke4-cluster-workers-1", etc.
+cluster_name = "mke4-cluster"
+
+# IP address or domain name that will be used to access MKE4 cluster
+external_address = "172.16.38.150"
+
+# Nested nodegroups variable is used to define group of nodes with same parameters
+nodegroups = {
+  "controllers" = {
+    role                 = "controller+worker"   # MKE4 role, currently only "controller+worker" and "worker" are available
+    count                = 1                     # Number of nodes
+    ssh_private_key_file = "~/.ssh/id_rsa"       # Path to private SSH key
+    ssh_public_key_file  = "~/.ssh/id_rsa.pub"   # Path to public SSH key
+    cpu                  = 4                     # Number of vCPU cores
+    ram                  = 8128                  # RAM in MBs
+    disk                 = 60                    # Disk size in GBs
+    user                 = "ubuntu"              # Name of the user that will be used to access the cluster through SSH. This user will be in sudoers group
+    image                = "ubuntu20.04"         # Name of the image to be used for VM
+    network_config_name  = "controllers_network" # Name of the network config that is defined later in this file.
+  },
+  "workers" = {
+    role                 = "worker"
+    count                = 1
+    ssh_private_key_file = "~/.ssh/id_rsa"
+    ssh_public_key_file  = "~/.ssh/id_rsa.pub"
+    cpu                  = 4
+    ram                  = 8128
+    disk                 = 60
+    user                 = "ubuntu"
+    image                = "ubuntu20.04"
+    network_config_name  = "workers_network"
+  },
+}
+
+# Network configuration, usually one per nodegroup
+network_config = {
+  "controllers_network" = {
+    subnet_name = "some_subnet" # Name of subnet in Nutanix
+    type        = "IPAM"        # Type of network, either "IPAM" or "DHCP". If IPAM is used, then three variables below need to be specified
+    ip_range    = "192.168.1.10-192.168.1.15"
+    gateway     = "192.168.1.1"
+    nameserver  = "192.168.1.53"
+  },
+  "workers_network" = {
+    subnet_name = "some_dhcp_subnet"
+    type        = "DHCP"
+  }
+}

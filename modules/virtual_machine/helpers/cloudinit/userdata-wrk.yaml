@@ -1,0 +1,15 @@
+#cloud-config
+hostname: ${hostname}
+create_hostname_file: true
+fqdn: ${hostname}
+users:
+  - name: ${user}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ${ssh_key}
+write_files:
+runcmd:
+  - 'rm /etc/machine-id'
+  - 'rm /var/lib/dbus/machine-id'
+  - 'dbus-uuidgen --ensure'
+  - 'systemd-machine-id-setup'
